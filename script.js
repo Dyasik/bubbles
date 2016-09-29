@@ -1,13 +1,14 @@
 'use strict';
 
-var WIDTH = 1280;
-var HEIGHT = 800;
+var WIDTH = 800;
+var HEIGHT = 600;
 var INTERVAL = 15;
+var ID;
 
 document.addEventListener('DOMContentLoaded', init);
 
 function init(event) {
-	var main = document.querySelector('#main');
+	var main = document.querySelector('#main_svg');
 	main.setAttribute('width', WIDTH);
 	main.setAttribute('height', HEIGHT);
 	var bub1 = document.querySelector('#bub1');
@@ -15,7 +16,7 @@ function init(event) {
 	document.addEventListener('click', function (event) {
 		if (animating) {
 			animating = false;
-			clearTimeout(id);
+			clearTimeout(ID);
 		} else {
 			animating = true;
 			startAnim();
@@ -32,7 +33,7 @@ function startAnim() {
 		x: 0,
 		y: 0
 	}
-	var id = setTimeout(anim, INTERVAL);
+	ID = setTimeout(anim, INTERVAL);
 	function anim() {
 		p.x += v.x;
 		p.y += v.y;
@@ -44,6 +45,6 @@ function startAnim() {
 		}
 		bub1.setAttribute('x', p.x);
 		bub1.setAttribute('y', p.y);
-		id = setTimeout(anim, INTERVAL);
+		ID = setTimeout(anim, INTERVAL);
 	}
 }

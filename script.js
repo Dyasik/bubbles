@@ -119,15 +119,14 @@ function startAnim() {
 				var y2 = bub2.p.y + SIDE/2 + PADD;
 				var dist = mod(x2 - x1, y2 - y1);
 				if (dist <= SIDE - PADD) {
-					console.log('collision');
 					var vx1 = bub1.v.x;
-					var vy1 = bub1.v.y;
+					var vy1 = -bub1.v.y;
 					var vx2 = bub2.v.x;
-					var vy2 = bub2.v.y;
+					var vy2 = -bub2.v.y;
 					var v1 = mod(vx1, vy1);
 					var v2 = mod(vx2, vy2);
-					var th1 = Math.asin(vx1 / v1); // first bubble angle
-					var th2 = Math.asin(vx2 / v2); // second bubble angle
+					var th1 = Math.atan(vy1 / vx1); // first bubble angle
+					var th2 = Math.atan(vy2 / vx2); // second bubble angle
 					var fi = Math.asin(Math.abs(bub1.p.x - bub2.p.x) / 
 						mod(bub1.p.x - bub2.p.x, bub1.p.y - bub2.p.y));
 					bub1.v.x = v2 * Math.cos(th2 - fi) * Math.cos(fi) +
@@ -138,6 +137,9 @@ function startAnim() {
 						v2 * Math.sin(th2 - fi) * Math.cos(fi + Math.PI/2);
 					bub2.v.y = v1 * Math.cos(th1 - fi) * Math.sin(fi) +
 						v2 * Math.sin(th2 - fi) * Math.sin(fi + Math.PI/2);
+
+					bub1.v.y *= -1;
+					bub2.v.y *= -1;
 					// var tx = v1.x;
 					// var ty = v1.y;
 					// v1.x = v2.x;

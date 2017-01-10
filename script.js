@@ -1,19 +1,17 @@
 'use strict';
 
-var WIDTH = 800;
-var HEIGHT = 600;
-var SIDE = 128; // px
-var INTERVAL = 10;
-// var PADDING_TOP_L = 18;
-// var PADDING_BTM_R = 20;
-var PADD = 3; // px
+var WIDTH = 800; // Screen width
+var HEIGHT = 600; // Screen height
+var SIDE = 128; // Bubble's side, px
+var INTERVAL = 10; // Animation delay
+var PADD = 3; // Distance between Bubble div and picture (padding), px
 var RAD = SIDE / 2;
-var MIN_DV = 1;
-var MAX_DV = 3;
-var SVG;
-var ID;
-var animating;
-var bubbles = []; // list of bubbles
+var MIN_DV = 1; // Min speed component
+var MAX_DV = 3; // Max speed component
+var SVG; // Screen
+var ID; // For animation timeout
+var animating; // Whether the animation is playing or not
+var bubbles = []; // List of bubbles
 
 function rand_from_range (min, max) {
 	if (arguments.length == 1) {
@@ -31,6 +29,26 @@ function mod(a, b) {
 	return Math.sqrt(Math.pow(a, 2) + Math.pow(b, 2));
 }
 
+// Projects vector A on vector B.
+function proj(a, b) {
+	var base = (a.x*b.x + a.y*b.y) / (b.x*b.x + b.y*b.y);
+	return {
+    	x: base * b.x,
+    	y: base * b.y
+ 	}
+}
+
+/**
+* Bubble class.
+*
+* @param x Number Left top corner X coord
+* @param y Number Left top corner Y coord
+* @param dx Number Speed's X part
+* @param dy Number Speed's Y part
+* @param side Number Side of the square div
+* 
+* @reutrns Object Bubble instance
+*/
 function Bubble(x, y, dx, dy, side) {
 	var v = {
 		x: dx,
@@ -46,10 +64,6 @@ function Bubble(x, y, dx, dy, side) {
 	bub.setAttribute('x', p.x);
 	bub.setAttribute('y', p.y);		
 	SVG.appendChild(bub);
-	// var div = document.createElement('div');
-	// div.setAttribute('style', 'left: ' + p.x + 'px; top: ' + p.y + 'px;');
-	// div.setAttribute('id', 'div');
-	// document.body.appendChild(div);
 
 	function move () {
 		p.x += v.x;
@@ -64,7 +78,6 @@ function Bubble(x, y, dx, dy, side) {
 		}
 		bub.setAttribute('x', p.x);
 		bub.setAttribute('y', p.y);
-		// div.setAttribute('style', 'left: ' + (p.x + SIDE/2) + 'px; top: ' + (p.y + SIDE/2) + 'px;');
 	}
 
 	return {
@@ -88,8 +101,6 @@ function init(event) {
 				startAnim();
 			}
 			bubbles.push(new Bubble(
-				// rand_from_range(-PADDING_TOP_L, WIDTH - SIDE + PADDING_BTM_R),
-				// rand_from_range(-PADDING_TOP_L, HEIGHT - SIDE + PADDING_BTM_R),
 				event.clientX - RAD,
 				event.clientY - RAD,
 				rand_speed(),
@@ -118,34 +129,24 @@ function startAnim() {
 				var x2 = bub2.p.x + SIDE/2 + PADD;
 				var y2 = bub2.p.y + SIDE/2 + PADD;
 				var dist = mod(x2 - x1, y2 - y1);
-				if (dist <= SIDE - PADD) {
-					var vx1 = bub1.v.x;
-					var vy1 = -bub1.v.y;
-					var vx2 = bub2.v.x;
-					var vy2 = -bub2.v.y;
-					var v1 = mod(vx1, vy1);
-					var v2 = mod(vx2, vy2);
-					var th1 = Math.atan(vy1 / vx1); // first bubble angle
-					var th2 = Math.atan(vy2 / vx2); // second bubble angle
-					var fi = Math.asin(Math.abs(bub1.p.x - bub2.p.x) / 
-						mod(bub1.p.x - bub2.p.x, bub1.p.y - bub2.p.y));
-					bub1.v.x = v2 * Math.cos(th2 - fi) * Math.cos(fi) +
-						v1 * Math.sin(th1 - fi) * Math.cos(fi + Math.PI/2);
-					bub1.v.y = v2 * Math.cos(th2 - fi) * Math.sin(fi) +
-						v1 * Math.sin(th1 - fi) * Math.sin(fi + Math.PI/2);
-					bub2.v.x = v1 * Math.cos(th1 - fi) * Math.cos(fi) +
-						v2 * Math.sin(th2 - fi) * Math.cos(fi + Math.PI/2);
-					bub2.v.y = v1 * Math.cos(th1 - fi) * Math.sin(fi) +
-						v2 * Math.sin(th2 - fi) * Math.sin(fi + Math.PI/2);
-
-					bub1.v.y *= -1;
-					bub2.v.y *= -1;
-					// var tx = v1.x;
-					// var ty = v1.y;
-					// v1.x = v2.x;
-					// v1.y = v2.y;
-					// v2.x = tx;
-					// v2.y = ty;
+				if (dist <= SIDE - PADD) { // Collision!
+					/* When two identical bodies collide, they 
+					   swap their normal speeds, while tangent speeds
+					   remain the same */
+					var cl = { // central line, connects bubbles' centers
+						x: x2 - x1,
+						y: y2 - y1
+					};
+					var v1 = bub1.v;
+					var v2 = bub2.v;
+					// calculate normal speeds
+					var v1norm = proj(v1, cl);
+					var v2norm = proj(v2, cl);
+					// swap 'em all!
+					bub1.v.x += -v1norm.x + v2norm.x;
+					bub1.v.y += -v1norm.y + v2norm.y;
+					bub2.v.x += -v2norm.x + v1norm.x;
+					bub2.v.y += -v2norm.y + v1norm.y;
 				}
 			}
 			}

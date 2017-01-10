@@ -47,7 +47,7 @@ function proj(a, b) {
 * @param dy Number Speed's Y part
 * @param side Number Side of the square div
 * 
-* @reutrns Object Bubble instance
+* @returns Object Bubble instance
 */
 function Bubble(x, y, dx, dy, side) {
 	var v = {
